@@ -1,10 +1,13 @@
-package ru.relastic.meet015architecture;
+package ru.relastic.meet015architecture.reposiroty;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import retrofit2.Callback;
+import ru.relastic.meet015architecture.domain.WeatherEntity;
+import ru.relastic.meet015architecture.domain.WeatherEntityCurrent;
 
 
+//Repository
 public class RetrofitApiMapper {
 
     private RetrofitHelper helper;

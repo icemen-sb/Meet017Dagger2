@@ -1,4 +1,4 @@
-package ru.relastic.meet015architecture;
+package ru.relastic.meet015architecture.reposiroty;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -8,6 +8,7 @@ import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+
 public class RetrofitHelper {
 
     private static final String VERSION_API = "2.5/";
@@ -15,7 +16,7 @@ public class RetrofitHelper {
     public static final String PATH_CURRENT = "weather";
     public static final String PATH_FORECAST = "forecast";
     public static final String APPID = "72bda240bd2e87975920efda89b36efa";
-    RetrofitHelper () {
+    public RetrofitHelper () {
 
     }
     public WeatherService getService() {

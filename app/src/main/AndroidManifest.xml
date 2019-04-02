@@ -14,7 +14,7 @@
         <activity android:name=".DetailsActivity"></activity>
 
         <service
-            android:name=".MyService"
+            android:name=".domain.MyService"
             android:enabled="true"
             android:exported="true" />
 

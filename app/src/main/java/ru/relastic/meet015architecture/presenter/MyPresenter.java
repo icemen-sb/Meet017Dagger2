@@ -1,4 +1,4 @@
-package ru.relastic.meet015architecture;
+package ru.relastic.meet015architecture.presenter;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -11,7 +11,10 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+
+import ru.relastic.meet015architecture.domain.MyService;
+import ru.relastic.meet015architecture.domain.WeatherEntity;
+import ru.relastic.meet015architecture.domain.WeatherEntityCurrent;
 
 public class MyPresenter {
 
@@ -34,35 +37,41 @@ public class MyPresenter {
         }
     };
 
-    MyPresenter(MPreserterCallbacks callback) {
+    public MyPresenter(MPreserterCallbacks callback) {
         context = (Context)callback;
         uiComponent = callback;
         context.bindService(MyService.getIntent(context), mConnection, Context.BIND_AUTO_CREATE);
     }
 
 
-    public void getWeatherForecast(@Nullable Long citi_id) {
-        Message msg = Message.obtain();
-        msg.replyTo = mCurrent;
-        msg.what = MyService.WHAT_REQUEST_LIST;
-        msg.getData().putLong(MyService.REQUEST_CITY_KEY,554234L);
-        try {
-            mService.send(msg);
-        } catch (RemoteException e) {
-            e.printStackTrace();
+    public void getWeatherForecast(@NonNull Long citi_id, @NonNull boolean isToday) {
+        if (mService != null) {
+            Message msg = Message.obtain();
+            msg.replyTo = mCurrent;
+            msg.what = MyService.WHAT_REQUEST_LIST;
+            msg.getData().putLong(MyService.REQUEST_CITY_KEY,citi_id);
+            msg.getData().putBoolean(MyService.REQUEST_IS_TODAY_KEY, isToday);
+            try {
+                mService.send(msg);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         }
     }
-    public void getCurrentWeatherForecast(@Nullable Long citi_id) {
-        Message msg = Message.obtain();
-        msg.replyTo = mCurrent;
-        msg.what = MyService.WHAT_MESSAGE_ITEM;
-        msg.getData().putLong(MyService.REQUEST_CITY_KEY,citi_id);
-        try {
-            mService.send(msg);
-        } catch (RemoteException e) {
-            e.printStackTrace();
+    public void getCurrentWeatherForecast(@NonNull Long citi_id) {
+        if (mService != null) {
+            Message msg = Message.obtain();
+            msg.replyTo = mCurrent;
+            msg.what = MyService.WHAT_REQUEST_ITEM;
+            msg.getData().putLong(MyService.REQUEST_CITY_KEY, citi_id);
+            try {
+                mService.send(msg);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         }
     }
+
     public void getBitmapByID(@NonNull String iconID) {
         Message msg = Message.obtain();
         msg.replyTo = mCurrent;
@@ -82,31 +91,23 @@ public class MyPresenter {
         @Override
         public void handleMessage(Message msg) {
             WeatherEntity data_list;
-            WeatherEntityCurrent data_list_item;
-            Bitmap icon;
-            int pos;
             switch (msg.what) {
                 case MyService.WHAT_MESSAGE_LIST:
-                    data_list = (WeatherEntity)msg.obj;
-                    uiComponent.onDataPrepared(data_list);
+                    uiComponent.onDataPrepared(WeatherEntity.prepareByArgs(msg));
                     break;
                 case MyService.WHAT_MESSAGE_ITEM:
-                    data_list_item = (WeatherEntityCurrent)msg.obj;
-                    uiComponent.onItemPrepared(data_list_item);
+                    //uiComponent.onDataPrepared(WeatherEntity.prepareByArgs(msg));
                     break;
                 case MyService.WHAT_MESSAGE_ICON:
-
-
-                    System.out.println("-------------------------- HAS WHAT_MESSAGE_ICON IN MYPRESENTER " +
-                            (msg.obj==null));
                     break;
             }
         }
     }
+
     public Messenger getService(){
         return mService;
     }
-    interface MPreserterCallbacks {
+    public interface MPreserterCallbacks {
         public void onServiceConnected();
         public void onDataPrepared(WeatherEntity weatherEntity);
         public void onItemPrepared(WeatherEntityCurrent weatherEntityCurrent);

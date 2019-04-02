@@ -1,9 +1,10 @@
-package ru.relastic.meet015architecture;
+package ru.relastic.meet015architecture.domain;
 
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
+//Entity 2
 public class WeatherEntityCurrent {
     @SerializedName("id")
     private long city_id;
@@ -72,7 +73,7 @@ public class WeatherEntityCurrent {
     }
 
 
-    class Main {
+    public class Main {
         @SerializedName("temp")
         private double temp;
 
@@ -116,7 +117,7 @@ public class WeatherEntityCurrent {
         }
     }
 
-    class Weather {
+    public class Weather {
         @SerializedName("description")
         private String description;
 
@@ -137,7 +138,7 @@ public class WeatherEntityCurrent {
         }
     }
 
-    class Wind {
+    public class Wind {
         @SerializedName("speed")
         private double wind_speed;
 

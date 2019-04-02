@@ -1,17 +1,26 @@
-package ru.relastic.meet015architecture;
+package ru.relastic.meet015architecture.domain;
 
+import android.os.Message;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.gson.annotations.SerializedName;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.TimeZone;
 
+
+//Entity 1
 public class WeatherEntity {
     static final String FORMAT_DEFAULT_DATE = "dd/MM/yyyy";
     static final String FORMAT_DEFAULT_TIME = "HH:mm:ss";
+    static final String DEFAULT_TIME_MIDDAY = "12:00:00";
     static final String FORMAT_DEFAULT_DATETIME = FORMAT_DEFAULT_DATE +" "+FORMAT_DEFAULT_TIME;
     static final String FORMAT_DEFAULT_DOUBLE = "%.1f";
     static final double VALUE_KELVIN_BASE = -273.15D;
@@ -36,7 +45,7 @@ public class WeatherEntity {
         this.list = list;
     }
 
-    class City {
+    public class City {
         @SerializedName("id")
         private long id;
 
@@ -68,7 +77,7 @@ public class WeatherEntity {
             this.coord = coord;
         }
 
-        class Coord {
+        public class Coord {
             @SerializedName("lat")
             private double lat;
 
@@ -93,7 +102,7 @@ public class WeatherEntity {
         }
     }
 
-    class ListArr {
+    public class ListArr {
         @SerializedName("dt")
         private long dt;
 
@@ -170,7 +179,7 @@ public class WeatherEntity {
             return sdf.format(new Date(this.dt*1000L));
         }
 
-        class Main {
+        public class Main {
             @SerializedName("temp")
             private double temp;
 
@@ -225,7 +234,7 @@ public class WeatherEntity {
             }
         }
 
-        class Weather {
+        public class Weather {
             @SerializedName("description")
             private String description;
 
@@ -247,7 +256,7 @@ public class WeatherEntity {
             }
         }
 
-        class Clouds {
+        public class Clouds {
             @SerializedName("all")
             private double all;
 
@@ -259,7 +268,7 @@ public class WeatherEntity {
             }
         }
 
-        class Wind {
+        public class Wind {
             @SerializedName("speed")
             private double speed;
 
@@ -280,5 +289,32 @@ public class WeatherEntity {
                 this.deg = deg;
             }
         }
+    }
+
+    public final static WeatherEntity prepareByArgs(@NonNull Message msg) {
+        WeatherEntity responseData = (WeatherEntity)msg.obj;
+        WeatherEntity retVal = new WeatherEntity();
+        retVal.setCity(responseData.getCity());
+        List<WeatherEntity.ListArr> list = new ArrayList<>();
+        if (msg.getData().getBoolean(MyService.REQUEST_IS_TODAY_KEY)) {
+
+            SimpleDateFormat sdf = new SimpleDateFormat(FORMAT_DEFAULT_DATE);
+            sdf.setTimeZone(TimeZone.getTimeZone("Europe/Moscow"));
+            String dateString =  sdf.format(new Date());
+
+            for (WeatherEntity.ListArr item : responseData.getList()) {
+                if (item.getDateString(null).equals(dateString)) {
+                    list.add(item);
+                }
+            }
+        }else {
+            for (WeatherEntity.ListArr item : responseData.getList()) {
+                if (item.getTimeString(null).equals(DEFAULT_TIME_MIDDAY)) {
+                    list.add(item);
+                }
+            }
+        }
+        retVal.setList(list);
+        return  retVal;
     }
 }

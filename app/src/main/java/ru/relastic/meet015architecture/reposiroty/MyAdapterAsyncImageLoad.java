@@ -1,4 +1,4 @@
-package ru.relastic.meet015architecture;
+package ru.relastic.meet015architecture.reposiroty;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -9,10 +9,7 @@ import android.widget.ImageView;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -27,7 +24,7 @@ public class MyAdapterAsyncImageLoad extends AsyncTask<String, Integer, Bitmap> 
     final URL url;
     private ILCallBacks mCallbacks = null;
 
-    MyAdapterAsyncImageLoad(Context context, @Nullable ImageView imageView, String icon_id) {
+    public MyAdapterAsyncImageLoad(Context context, @Nullable ImageView imageView, String icon_id) {
 
         this.context = context;
         this.imageView = imageView;

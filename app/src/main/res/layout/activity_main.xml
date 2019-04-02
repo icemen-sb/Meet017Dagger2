@@ -25,17 +25,17 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="15dp"
             android:layout_weight="50"
-            android:checkedButton="@+id/radioButton2">
+            android:checkedButton="@+id/radioButtonForecast">
 
             <RadioButton
-                android:id="@+id/radioButton"
+                android:id="@+id/radioButtonToday"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Today" />
 
             <RadioButton
-                android:id="@+id/radioButton2"
+                android:id="@+id/radioButtonForecast"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"

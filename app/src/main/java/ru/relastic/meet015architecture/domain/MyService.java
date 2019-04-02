@@ -1,25 +1,26 @@
-package ru.relastic.meet015architecture;
+package ru.relastic.meet015architecture.domain;
 
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.widget.ImageView;
-
-import java.util.ArrayList;
 
 import retrofit2.Call;
 import retrofit2.Response;
+import ru.relastic.meet015architecture.reposiroty.RetrofitApiMapper;
+import ru.relastic.meet015architecture.reposiroty.RetrofitHelper;
+import ru.relastic.meet015architecture.reposiroty.MyAdapterAsyncImageLoad;
 
+//Domain
 public class MyService extends Service {
     public static final String REQUEST_CITY_KEY = "request_city_key";
+    public static final String REQUEST_IS_TODAY_KEY = "request_is_today_key";
     public static final String REQUEST_ICON_KEY = "request_icon_key";
     public static final int WHAT_CLIENT_CONNECTED = 1;
     public static final int WHAT_MESSAGE_LIST = 2;
@@ -32,15 +33,6 @@ public class MyService extends Service {
 
     private Messenger mService = new Messenger(new MyServiceHandler());
 
-    private RetrofitApiMapper mRetrofitApiMapper = new RetrofitApiMapper(new RetrofitHelper());
-
-    public MyService() {
-    }
-
-    @Override
-    public void onCreate() {
-        mRetrofitApiMapper = new RetrofitApiMapper(new RetrofitHelper()) ;
-    }
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -52,21 +44,18 @@ public class MyService extends Service {
 
 
     class MyServiceHandler extends Handler {
+        //Use cases
+
+        private RetrofitApiMapper mRetrofitApiMapper = new RetrofitApiMapper(new RetrofitHelper());
         MyServiceHandler() {
             super(Looper.getMainLooper());
         }
         @Override
         public void handleMessage(Message msg) {
-
             final Messenger client = msg.replyTo;
-
-            //long id= 554234L; //Kaliningrad
-            //long id= 524901L; //Moscow
-            //long id= 536203L; //St.Peterburg
-            //long id= 1486209L; //Ykaterinburg
-            //long id= 2013348L; //Vladivostok
+            final Message msgResponse = new Message();
+            msgResponse.copyFrom(msg);
             long id = msg.getData().getLong(REQUEST_CITY_KEY);
-            if (id==0L) {id = 524901L;}
             switch (msg.what) {
                 case WHAT_CLIENT_CONNECTED:
                     break;
@@ -74,12 +63,11 @@ public class MyService extends Service {
                     mRetrofitApiMapper.requestWeatherByCitiId(id, RetrofitHelper.APPID, new retrofit2.Callback<WeatherEntity>() {
                         @Override
                         public void onResponse(Call<WeatherEntity> call, Response<WeatherEntity> response) {
-                            Message msg = new Message();
-                            msg.what = WHAT_MESSAGE_LIST;
-                            msg.obj = response.body();
-                            msg.replyTo = mService;
+                            msgResponse.what = WHAT_MESSAGE_LIST;
+                            msgResponse.obj = response.body();
+                            msgResponse.replyTo = mService;
                             try {
-                                client.send(msg);
+                                client.send(msgResponse);
                             } catch (RemoteException e) {
                                 e.printStackTrace();
                             }
@@ -136,6 +124,4 @@ public class MyService extends Service {
             }
         }
     }
-
-
 }
