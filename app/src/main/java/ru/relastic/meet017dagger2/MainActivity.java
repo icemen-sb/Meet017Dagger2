@@ -1,6 +1,5 @@
 package ru.relastic.meet017dagger2;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;

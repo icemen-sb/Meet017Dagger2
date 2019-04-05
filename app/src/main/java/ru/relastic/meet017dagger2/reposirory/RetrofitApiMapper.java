@@ -1,11 +1,8 @@
 package ru.relastic.meet017dagger2.reposirory;
 
-import android.os.RemoteException;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import dagger.Module;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;

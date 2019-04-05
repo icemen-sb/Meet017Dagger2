@@ -14,8 +14,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import javax.inject.Inject;
-
 import ru.relastic.meet017dagger2.domain.MyService;
 
 public class MyAsyncImageLoad extends AsyncTask<String, Integer, Bitmap> implements ImageLoader{
