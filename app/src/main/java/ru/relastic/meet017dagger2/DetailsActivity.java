@@ -1,7 +1,8 @@
-package ru.relastic.meet015architecture;
+package ru.relastic.meet017dagger2;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -9,12 +10,16 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import ru.relastic.meet015architecture.domain.WeatherEntity;
-import ru.relastic.meet015architecture.reposiroty.MyAdapterAsyncImageLoad;
-import ru.relastic.meet015architecture.reposiroty.RetrofitApiMapper;
+import javax.inject.Inject;
+
+import ru.relastic.meet017dagger2.dagger.Appl;
+import ru.relastic.meet017dagger2.domain.WeatherEntity;
+import ru.relastic.meet017dagger2.domain.WeatherEntityCurrent;
+import ru.relastic.meet017dagger2.presenter.MyPresenter;
+import ru.relastic.meet017dagger2.reposirory.RetrofitApiMapper;
 
 
-public class DetailsActivity extends AppCompatActivity {
+public class DetailsActivity extends AppCompatActivity implements MyPresenter.IPreserterCallbacks {
     WeatherEntity mData;
     int index;
     Button mButton;
@@ -25,12 +30,15 @@ public class DetailsActivity extends AppCompatActivity {
              mTW_par_right1, mTW_par_right2, mTW_par_right3, mTW_par_right4, mTW_par_right5
             , mTW_par_right6, mTW_par_right7;
 
+    @Inject
+    public MyPresenter mPresenter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Appl.getSubcomponent().inject(this);
+
         setContentView(R.layout.activity_details);
-
-
 
         mData = RetrofitApiMapper.convertJSON(getIntent().getExtras().getString("data"));
         index = getIntent().getExtras().getInt("index");
@@ -38,6 +46,18 @@ public class DetailsActivity extends AppCompatActivity {
         initViews();
         initListeners();
         init();
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mPresenter.connect(this)) {
+            onServiceConnected();
+        }
+    }
+    @Override
+    protected void onPause() {
+        mPresenter.disconnect();
+        super.onPause();
     }
 
     private void initViews() {
@@ -73,9 +93,6 @@ public class DetailsActivity extends AppCompatActivity {
     }
 
     private void init() {
-        MyAdapterAsyncImageLoad imageLoader = new MyAdapterAsyncImageLoad(
-                this,mImageView,mData.getList().get(index).getWeather().get(0).getIcon_id());
-        imageLoader.execute("");
         mTWCity.setText(mData.getCity().getName());
         mTWDate.setText(mData.getList().get(index).getDateTimeString(null));
         mTWLat.setText(String.valueOf(mData.getCity().getCoord().getLat()));
@@ -96,8 +113,20 @@ public class DetailsActivity extends AppCompatActivity {
         mTW_par_right7.setText(String.valueOf(mData.getList().get(index).getClouds().getAll()));
     }
 
-
     public static Intent getIntent(Context context){
         return new Intent(context, DetailsActivity.class);
+    }
+
+    @Override
+    public void onServiceConnected() {
+        mPresenter.getBitmapByID(mData.getList().get(index).getWeather().get(0).getIcon_id());
+    }
+    @Override
+    public void onDataPrepared(WeatherEntity weatherEntity) {}
+    @Override
+    public void onItemPrepared(WeatherEntityCurrent weatherEntityCurrent) {}
+    @Override
+    public void onIconPrepared(Bitmap icon) {
+        mImageView.setImageBitmap(icon);
     }
 }

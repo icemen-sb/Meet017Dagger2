@@ -1,4 +1,4 @@
-package ru.relastic.meet015architecture.presenter;
+package ru.relastic.meet017dagger2.presenter;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -11,36 +11,53 @@ import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
+import java.util.HashSet;
 
-import ru.relastic.meet015architecture.domain.MyService;
-import ru.relastic.meet015architecture.domain.WeatherEntity;
-import ru.relastic.meet015architecture.domain.WeatherEntityCurrent;
+import javax.inject.Inject;
+
+import ru.relastic.meet017dagger2.domain.MyService;
+import ru.relastic.meet017dagger2.domain.WeatherEntity;
+import ru.relastic.meet017dagger2.domain.WeatherEntityCurrent;
 
 public class MyPresenter {
-
-    private MPreserterCallbacks uiComponent;
-    private Context context;
+    private IPreserterCallbacks mIPreserterCallbacks;
+    private final Context mContext;
+    private final HashSet<IPreserterImageCallback> uiCallbacksArray = new HashSet<>();
     private MyHandler myHandler = new MyHandler();
     private Messenger mCurrent = new Messenger(myHandler);
     private Messenger mService;
-
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             mService = new Messenger(service);
-            uiComponent.onServiceConnected();
+            System.out.println("--------- SERVICE CONNECTED");
+            mIPreserterCallbacks.onServiceConnected();
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
+            System.out.println("--------- SERVICE DISCONNECTED");
             mService = null;
         }
     };
 
-    public MyPresenter(MPreserterCallbacks callback) {
-        context = (Context)callback;
-        uiComponent = callback;
-        context.bindService(MyService.getIntent(context), mConnection, Context.BIND_AUTO_CREATE);
+    public MyPresenter(@NonNull Context context) {
+        this.mContext = context;
+    }
+
+    public boolean connect(IPreserterCallbacks callback){
+        boolean valRetVal = (mService == null);
+        mIPreserterCallbacks=callback;
+        if (valRetVal) {mContext.bindService(
+                MyService.getIntent(mContext),
+                mConnection,
+                Context.BIND_AUTO_CREATE);}
+        return !valRetVal;
+    }
+
+    public void disconnect(){
+        mIPreserterCallbacks=null;
+        //mContext.unbindService(mConnection);
     }
 
 
@@ -71,7 +88,6 @@ public class MyPresenter {
             }
         }
     }
-
     public void getBitmapByID(@NonNull String iconID) {
         Message msg = Message.obtain();
         msg.replyTo = mCurrent;
@@ -79,6 +95,19 @@ public class MyPresenter {
         msg.getData().putString(MyService.REQUEST_ICON_KEY,iconID);
         try {
             mService.send(msg);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+    }
+    public void getBitmapByID(@NonNull String iconID, IPreserterImageCallback callback) {
+        Message msg = Message.obtain();
+        msg.replyTo = mCurrent;
+        msg.what = MyService.WHAT_REQUEST_ICON;
+        msg.getData().putString(MyService.REQUEST_ICON_KEY,iconID);
+        msg.getData().putInt(MyService.REQUEST_ICON_CALLBACK_KEY,callback.hashCode());
+        try {
+            mService.send(msg);
+            uiCallbacksArray.add(callback);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -93,24 +122,36 @@ public class MyPresenter {
             WeatherEntity data_list;
             switch (msg.what) {
                 case MyService.WHAT_MESSAGE_LIST:
-                    uiComponent.onDataPrepared(WeatherEntity.prepareByArgs(msg));
+                    mIPreserterCallbacks.onDataPrepared(WeatherEntity.prepareByArgs(msg));
                     break;
                 case MyService.WHAT_MESSAGE_ITEM:
-                    //uiComponent.onDataPrepared(WeatherEntity.prepareByArgs(msg));
+                    //
                     break;
                 case MyService.WHAT_MESSAGE_ICON:
+                    int hash_source = msg.getData().getInt(MyService.REQUEST_ICON_CALLBACK_KEY);
+                    if (hash_source>0) {
+                        for(IPreserterImageCallback item : uiCallbacksArray) {
+                            if (item.hashCode()==hash_source) {
+                                item.onIconPrepared((Bitmap) msg.obj);
+                                uiCallbacksArray.remove(item);
+                                break;
+                            }
+                        }
+                    }else {
+                        mIPreserterCallbacks.onIconPrepared((Bitmap) msg.obj);
+                    }
                     break;
             }
         }
     }
 
-    public Messenger getService(){
-        return mService;
-    }
-    public interface MPreserterCallbacks {
+    public interface IPreserterCallbacks {
         public void onServiceConnected();
         public void onDataPrepared(WeatherEntity weatherEntity);
         public void onItemPrepared(WeatherEntityCurrent weatherEntityCurrent);
-        public void onIconPrepared(Bitmap icon, int pos);
+        public void onIconPrepared(Bitmap icon);
+    }
+    public interface IPreserterImageCallback {
+        public void onIconPrepared(Bitmap icon);
     }
 }

@@ -1,4 +1,4 @@
-package ru.relastic.meet015architecture;
+package ru.relastic.meet017dagger2;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("ru.relastic.meet015architecture", appContext.getPackageName());
+        assertEquals("ru.relastic.meet017dagger2", appContext.getPackageName());
     }
 }

@@ -1,4 +1,4 @@
-package ru.relastic.meet015architecture;
+package ru.relastic.meet017dagger2;
 
 import org.junit.Test;
 

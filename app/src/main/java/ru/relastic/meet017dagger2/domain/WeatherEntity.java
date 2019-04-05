@@ -1,4 +1,4 @@
-package ru.relastic.meet015architecture.domain;
+package ru.relastic.meet017dagger2.domain;
 
 import android.os.Message;
 import android.support.annotation.NonNull;
@@ -8,11 +8,8 @@ import com.google.gson.annotations.SerializedName;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.TimeZone;
 
 

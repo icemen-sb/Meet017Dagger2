@@ -1,4 +1,4 @@
-package ru.relastic.meet015architecture.domain;
+package ru.relastic.meet017dagger2.domain;
 
 import com.google.gson.annotations.SerializedName;
 
